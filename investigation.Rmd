@@ -16,6 +16,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-lib, message = FALSE}
 library(tidyverse)
+library(janitor)
+      
 # Add any other libraries here
 
 
@@ -25,10 +27,74 @@ library(tidyverse)
 
 ```{r load-data}
 # load your data 
+bike_data <- read_csv("data/SeoulBikeData.csv")
+glimpse(bike_data)
+bike_data <- bike_data %>%
+  clean_names()
+names(bike_data)
 
+bike_data <- bike_data %>%
+  rename(
+    temperature = temperature_yin,
+    dew_point_temperature = dew_point_temperature_yin
+  )
 
+names(bike_data)
+sum(is.na(bike_data))
+nrow(bike_data)
+nrow(distinct(bike_data))
+bike_clean <- bike_data %>%
+  filter(functioning_day == "Yes")
+
+glimpse(bike_clean)
+
+nrow(bike_clean)
+bike_clean %>%
+  distinct(date, hour) %>%
+  nrow()
 
 
 ```
 
 
+#Research Question1: How does bike rental demand vary across different hours of the day and seasons?
+hourly_rentals <- bike_clean %>%
+  group_by(hour) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
+  geom_line(colour = "blue") +
+  labs(
+    title = "Average Bike Rentals by Hour",
+    x = "Hour of the Day",
+    y = "Average Number of Bike Rentals"
+  )
+  
+  seasonal_rentals <- bike_clean %>%
+  group_by(seasons, hour) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+ggplot(seasonal_rentals,
+       aes(x = hour, y = avg_rentals, colour = seasons)) +
+  geom_line() +
+  labs(
+    title = "Average Hourly Bike Rentals by Season",
+    x = "Hour of the Day",
+    y = "Average Number of Bike Rentals"
+  )
+  
+  seasonal_avg <- bike_clean %>%
+  group_by(seasons) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+  ggplot(seasonal_avg,
+       aes(x = seasons, y = avg_rentals, fill = seasons)) +
+  geom_col() +
+  labs(
+    title = "Average Bike Rentals by Season",
+    x = "Season",
+    y = "Average Number of Bike Rentals"
+  )
