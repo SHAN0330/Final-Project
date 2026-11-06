@@ -71,6 +71,20 @@ ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
     y = "Average Number of Bike Rentals"
   )
   
+  seasonal_avg <- bike_clean %>%
+  group_by(seasons) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+  ggplot(seasonal_avg,
+       aes(x = seasons, y = avg_rentals, fill = seasons)) +
+  geom_col() +
+  labs(
+    title = "Average Bike Rentals by Season",
+    x = "Season",
+    y = "Average Number of Bike Rentals"
+  )
+  
   seasonal_rentals <- bike_clean %>%
   group_by(seasons, hour) %>%
   summarise(
@@ -85,16 +99,31 @@ ggplot(seasonal_rentals,
     y = "Average Number of Bike Rentals"
   )
   
-  seasonal_avg <- bike_clean %>%
-  group_by(seasons) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-  ggplot(seasonal_avg,
-       aes(x = seasons, y = avg_rentals, fill = seasons)) +
-  geom_col() +
+  
+#Research Question2 : How do weather conditions affect bike rental demand in Seoul?
+
+ggplot(bike_clean,
+       aes(x = temperature,
+           y = rented_bike_count)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth() +
   labs(
-    title = "Average Bike Rentals by Season",
-    x = "Season",
-    y = "Average Number of Bike Rentals"
+    title = "Bike Rentals vs Temperature",
+    x = "Temperature (°C)",
+    y = "Number of Bike Rentals"
   )
+  
+ggplot(bike_clean,
+       aes(x = temperature,
+           y = rented_bike_count)) +
+  geom_line() +
+  labs(
+    title = "Bike Rentals vs Temperature",
+    x = "Temperature (°C)",
+    y = "Number of Bike Rentals"
+  )
+  
+
+
+  
+ 
