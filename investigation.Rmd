@@ -137,7 +137,6 @@ ggplot(data = daily_rentals,
         title = "Bike Rentals depends on Holidays",
         x = "Holiday",
         y = "Sum of Bike Rentals each Day"
-    ) +
-    theme_minimal()
+    )
   
  
