@@ -124,6 +124,20 @@ ggplot(bike_clean,
   )
   
 
-
+#Q3
+daily_rentals <- bike_clean %>%
+    group_by(date, holiday) %>%
+    summarise(
+        sum_rentals = sum(rented_bike_count)
+    )
+ggplot(data = daily_rentals, 
+       mapping = aes(x = factor(holiday), y = sum_rentals, fill = holiday)) +
+    geom_boxplot() +
+    labs(
+        title = "Bike Rentals depends on Holidays",
+        x = "Holiday",
+        y = "Sum of Bike Rentals each Day"
+    ) +
+    theme_minimal()
   
  
