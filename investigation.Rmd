@@ -212,18 +212,6 @@ ggplot(holiday_hourly,
 ```
 
 
-=======
-    summarise(
-        sum_rentals = sum(rented_bike_count)
-    )
-ggplot(data = daily_rentals, 
-       mapping = aes(x = factor(holiday), y = sum_rentals, fill = holiday)) +
-    geom_boxplot() +
-    labs(
-        title = "Bike Rentals depends on Holidays",
-        x = "Holiday",
-        y = "Sum of Bike Rentals each Day"
-    )
   
  
 >>>>>>> c97be4b16f018ac3e0dba29a5782198e46775ad0
