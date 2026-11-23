@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load-lib, message = FALSE}
 library(tidyverse)
 library(janitor)
+library(tidymodels)
       
 # Add any other libraries here
 
@@ -160,6 +161,67 @@ ggplot(rainfall_level_avg,
     y = "Average Hourly Bike Rentals"
   ) +
   theme_minimal()
+
+
+#Model 1: Weather-only Multiple Linear Regression
+
+temp_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature,
+      data = bike_clean)
+
+tidy(temp_fit)
+
+glance(temp_fit)
+
+weather_data <- bike_clean %>%
+  mutate(rain_status = case_when(
+    rainfall_mm == 0 ~ "No Rain",
+    rainfall_mm > 0 ~ "Rain"
+  ))
+
+weather_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature +
+        humidity_percent + rain_status,
+      data = weather_data)
+
+tidy(weather_fit)
+
+glance(weather_fit)
+
+# Model 2: Multiple Linear Regression with Additional Variables
+
+weather_fit_2 <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature +
+        humidity_percent + rain_status +
+        factor(hour) + seasons + holiday,
+      data = weather_data)
+
+tidy(weather_fit_2)
+
+glance(weather_fit_2)
+
+# Residual Plot for Model 2
+
+weather_aug_2 <- augment(weather_fit_2$fit)
+
+ggplot(weather_aug_2,
+       aes(x = .fitted, y = .resid)) +
+  geom_point(alpha = 0.1) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed") +
+  labs(
+    title = "Residual Plot for Adjusted Weather Model",
+    x = "Fitted Values",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+
+glance(temp_fit)
+glance(weather_fit)
+glance(weather_fit_2)
   
   
   
@@ -213,4 +275,3 @@ ggplot(holiday_hourly,
 
   
  
->>>>>>> c97be4b16f018ac3e0dba29a5782198e46775ad0
