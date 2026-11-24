@@ -274,7 +274,7 @@ ggplot(bike_clean,
 ---
 class:center middle
 ## This scatter plot with a LOESS smoother shows a non-linear relationship between hourly bike rentals and humidity.
-## Rental demand rises slightly when humidity increases to around 50-60%, then falls noticeably when humidity higher than around 70%
+##Rental demand rises slightly when humidity increases to around 50-60%, then falls noticeably when humidity higher than around 70%
 ##The wide spread of points indicates temperature alone cannot fully explain rental volume.
 ---
 Average Bike Rentals by Rainfall Level
@@ -335,7 +335,7 @@ ggplot(rainfall_level_avg,
 ---
 class:center middle
 ##This bar chart shows average hourly bike rentals grouped bu rainfall level.
-##Average rentals in no rainy days are far higher than rainy days.As rainfall increases, the average rental volume drops substantially.When rainfall level is 0-2mm, the demand of rentals already reduced and stay low for morderate(2-5mm) and heavy rain(above 5mm)
+##Average rentals in no rainy days are far higher than rainy days.As rainfall increases, the average rental volume dropssubstantially.When rainfall level is 0-2mm, the demand of rentals already reduced and stay low for morderate(2-5mm) and heavy rain(above 5mm)
 ---
 class: inverse center middle
 ##Do rental patterns differ between working days and holidays?
@@ -435,140 +435,21 @@ class:center middle
 ##On non-holidays, there are two peaks: morning peak and evening peak,matching commuting hours. Holidays demand follows a single peak in the afternoon with no extreme sharp floating in short time.
 ##This difference reflects contrasting purpose:commuting on workdays and leisure on holidays
 ---
-## A statement of the overall goal / research question
-
+class:inverse center middle
+##Findings & Discussion
 ---
-
-class: inverse, center, middle
-
-# Section title
-
+class: middle
+# Findings
+###Demand for bike-sharing is strongly associated with time of day and season.
+###Weather conditions(eg. temperature and rainfall) $\Rightarrow$ cycling activity
+###Daily and hourly rental pattern on holidays $\Rightarrow$ travel purpose.
 ---
-
-# Hello World
-
-- Click the `Knit` button to compile your presentation
-
-- Make sure to commit and push all resulting files to your GitHub repo
-
+class:middle
+#Key limitations
+###1.As observational data, the dataset only allows idnetification of associations rather than definitive causal relationships
+###2.Variables including temperature,humidity,season and time of day are confounded with one another
+###3.The original dataset provides no information about users' actual trip purpose
 ---
-
-class: inverse, middle, center
-
-# Using xaringan
-
----
-
-# xaringan
-
-- The presentation is created using the `xaringan` package
-
-- Use `---` to separate slides and `--` for incremental builds
-
---
-
-- Like this
-
----
-
-# Layouts
-
-You can use plain text
-
-- or bullet points
-
-.pull-left[
-or text in two columns $^*$
-]
-.pull-right[
-- like
-- this
-]
-
-.footnote[
-[*] And add footnotes
-]
-
----
-
-# Code
-
-```{r boring-regression}
-# a boring regression
-model <- lm(dist ~ speed, data = cars)
-tidy(model)
-glance(model)
-```
-
----
-
-# Plots
-
-```{r recode-species, echo = FALSE}
-# In this chunk I'm doing a bunch of analysis that I don't want to present 
-# in my slides. But I need the resulting data frame for a plot I want to present.
-iris_modified <- iris %>%
-  mutate(Species = fct_other(Species, keep = "setosa"))
-```
-
-```{r plot-iris, echo = FALSE}
-# Code hidden with echo = FALSE
-# Uses modified iris dataset from previous chunk
-# Play around with height and width until you're happy with the look
-ggplot(data = iris_modified, mapping = aes(x = Sepal.Width, y = Sepal.Length, color = Species)) +
-  geom_point() + 
-  theme_minimal() # theme options: https://ggplot2.tidyverse.org/reference/ggtheme.html
-```
-
-```{r Average hourly bike rentals in Seoul, echo = FALSE}
-# Code hidden with echo = FALSE
-# Uses modified iris dataset from previous chunk
-# Play around with height and width until you're happy with the look
-hourly_rentals <- bike_clean %>%
-  group_by(hour) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-
-ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
-  geom_line(colour = "blue") +
-  labs(
-    title = "Average hourly bike rentals in Seoul",
-    x = "Hour of the Day",
-    y = "Average Number of Bike Rentals Per Hour"
-  )+
-  theme_minimal()
-```
----
-
-## Plot and text
-
-.pull-left[
-- Some text
-- goes here
-]
-.pull-right[
-```{r warning=FALSE, out.width="100%", fig.width=4, echo=FALSE}
-# see how I changed out.width and fig.width from defaults
-# to make the figure bigger
-ggplot(penguins, aes(x = bill_length_mm, y = species, color = species)) +
-  geom_boxplot() +
-  theme_minimal()
-```
-]
-
----
-
-# Tables
-
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
-```{r iris-table, echo = FALSE}
-kable(head(iris), format = "html")
-```
-
----
-
 # Images
 
 ```{r castle, echo = FALSE, out.width = "55%", fig.align = "center", fig.cap = "Image credit: Photo by Jörg Angeli on Unsplash."}
