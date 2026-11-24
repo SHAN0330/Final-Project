@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-lib, include = FALSE}
 library(tidyverse)
+library(janitor)
+library(tidymodels)
 # Add any other libraries here
 
 
@@ -21,7 +23,211 @@ library(tidyverse)
 
 ```{r load-data, include=FALSE}
 # load your data here and any pre-processing/cleaning 
+bike_data <- read_csv("data/SeoulBikeData.csv")
+
+bike_data <- bike_data %>%
+  clean_names() %>%
+  rename(
+    temperature = temperature_yin,
+    dew_point_temperature = dew_point_temperature_yin
+  )
+
+bike_clean <- bike_data %>%
+  filter(functioning_day == "Yes")
+
+```
+
+```{r RQ1, echo=FALSE}
 #  that you need for your report.
+
+#Research Question1: and see How does bike rental demand vary across different hours of the day sons?
+hourly_rentals <- bike_clean %>%
+  group_by(hour) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+#Diagram1: "Average hourly bike rentals in Seoul"
+ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
+  geom_line(colour = "blue") +
+  labs(
+    title = "Average hourly bike rentals in Seoul",
+    x = "Hour of the Day",
+    y = "Average Number of Bike Rentals Per Hour"
+  )+
+  theme_minimal()
+
+#Diagram2: "Hourly Bike Rental Patterns Differ Across Seasons"
+  seasonal_rentals <- bike_clean %>%
+  group_by(seasons, hour) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+ggplot(seasonal_rentals,
+       aes(x = hour, y = avg_rentals, colour = seasons)) +
+  geom_line() +
+  labs(
+    title = "Hourly Bike Rentals Patterns by Season",
+    x = "Hour of the Day",
+    y = "Average Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+```
+
+```{r RQ2, echo=FALSE}
+#Research Question2 : How do weather conditions affect bike rental demand in Seoul?
+
+#Diagram1: "Bike Rentals vs Temperature"
+ggplot(bike_clean,
+       aes(x = temperature,
+           y = rented_bike_count)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth() +
+  labs(
+    title = "Bike Rentals vs Temperature",
+    x = "Temperature (°C)",
+    y = "Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+
+#Diagram2: "Average Bike Rentals by Rainfall Level"
+rainfall_level_avg <- bike_clean %>%
+  mutate(rain_level = case_when(
+    rainfall_mm == 0 ~ "No Rain",
+    rainfall_mm > 0 & rainfall_mm <= 2 ~ "0-2 mm",
+    rainfall_mm > 2 & rainfall_mm <= 5 ~ "2-5 mm",
+    rainfall_mm > 5 ~ "Above 5 mm"
+  )) %>%
+  group_by(rain_level) %>%
+  summarise(avg_rentals = mean(rented_bike_count),
+            n = n()
+            )
+
+ggplot(rainfall_level_avg,
+       aes(x = factor(rain_level,
+                      levels = c("No Rain", "0-2 mm", "2-5 mm", "Above 5 mm")),
+           y = avg_rentals
+           )) +
+  geom_col() +
+  labs(
+    title = "Average Bike Rentals by Rainfall Level",
+    x = "Rainfall Level",
+    y = "Average Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+
+#Regression Analysis 
+
+#Basic Model 1: Temperature Only
+temp_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature,
+      data = bike_clean)
+
+#Model 2: Weather Variables
+weather_data <- bike_clean %>%
+  mutate(rain_status = case_when(
+    rainfall_mm == 0 ~ "No Rain",
+    rainfall_mm > 0 ~ "Rain"
+  ))
+
+weather_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature +
+        humidity_percent + rain_status,
+      data = weather_data)
+
+#Model 3: Weather and other factors
+weather_fit_2 <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature +
+        humidity_percent + rain_status +
+        factor(hour) + seasons + holiday,
+      data = weather_data)
+
+#Residual Plot for Model 3:
+weather_aug_2 <- augment(weather_fit_2$fit)
+
+ggplot(weather_aug_2,
+       aes(x = .fitted, y = .resid)) +
+  geom_point(alpha = 0.1) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed") +
+  labs(
+    title = "Residual Plot for Adjusted Weather Model",
+    x = "Fitted Values",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+
+#Compare three models
+glance(temp_fit)
+glance(weather_fit)
+glance(weather_fit_2)
+
+model_comparison <- data.frame(
+  Model = c("Temperature Only",
+            "Weather Model",
+            "Adjusted Weather Model"),
+  R_squared = c(0.317, 0.433, 0.677),
+  Adjusted_R_squared = c(0.317, 0.432, 0.676),
+  Sigma = c(531.02, 483.91, 365.85)
+)
+model_comparison
+
+coefficient_comparison <- data.frame(
+  Variable = c("Temperature",
+               "Humidity",
+               "Rain Status"),
+  Weather_Model = c(32.64, -7.33, -473.55),
+  Adjusted_Weather_Model = c(24.46, -5.63, -522.56)
+)
+coefficient_comparison
+```
+According to Regression analysis
+Temperature only: Predicted hourly bike rentals = 348 + 29.9 × Temperature.
+Weather variables: Predicted hourly bike rentals = 767.33 + 32.64 × Temperature
+- 7.33 × Humidity - 473.55 × Rain Status
+```{r RQ3, echo=FALSE}
+#RQ3: How do bike rental patterns differ between holidays and non-holidays?
+
+#Diagram1: "Daily Bike Rentals: Holidays vs Non-Holidays"
+daily_rentals <- bike_clean %>%
+    group_by(date, holiday) %>%
+  summarise(sum_rentals = sum(rented_bike_count),
+            n_hours = n()
+            ) %>%
+  filter(n_hours == 24)
+
+ggplot(daily_rentals,
+       aes(x = holiday,
+           y = sum_rentals,
+           fill = holiday)) +
+  geom_boxplot() +
+  labs(
+    title = "Daily Bike Rentals: Holidays vs Non-Holidays",
+    x = "Day Type",
+    y = "Daily Bike Rentals"
+  ) +
+  theme_minimal()
+
+#Diagram2: "Hourly Bike Rental Patterns by Holiday Status"
+holiday_hourly <- bike_clean %>%
+  group_by(holiday, hour) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+ggplot(holiday_hourly,
+       aes(x = hour,
+           y = avg_rentals,
+           colour = holiday)) +
+  geom_line() +
+  labs(
+    title = "Hourly Bike Rental Patterns by Holiday Status",
+    x = "Hour of the Day",
+    y = "Average Hourly Bike Rentals",
+  ) +
+  theme_minimal()
+
 
 
 
