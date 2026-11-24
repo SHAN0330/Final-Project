@@ -42,7 +42,7 @@ class: center middle
 ##2.How are weather conditions associated with hourly bike rentals?
 ##3.Do rental patterns differ between working days and holidays?
 ---
-class:center middle
+class: inverse center middle
 ## How do hourly Seoul bike rentals vary by time of day
 ---
 ```{r load-data, include=FALSE}
@@ -109,6 +109,11 @@ style_xaringan(
 )
 ```
 ---
+class:center middle
+##The plot shows the average hourly bike rentals across the day in Seoul.
+##The overall distribution follows a bimoal pattern, where the evening peak is higher than the morning one and the lowest point is in the early morning around 5 a.m. 
+##This indicates that bike rentals are dominated by commuting, with greater demand during the after-work period.
+---
 #Average Hourly Bike Rentals by Season in Seoul
 ```{r echo=TRUE,eval=FALSE}
 seasonal_avg <- bike_clean %>%
@@ -156,6 +161,11 @@ seasonal_avg <- bike_clean %>%
   theme_minimal()
 ```
 ---
+class:center middle
+##This bar chart compares average hourly bike rentals across four seasons in Seoul. 
+##Average bike rentals peak in summer, are moderatley high in autumn and spring, but drop sharply in winter. 
+##The pattern suggests that season and weather are associated with bike‑riding demand, with much lower usage in cold winter months.
+---
 ##Hourly Bike Rental Patterns Differ Across Seasons
 ```{r echo=TRUE,eval=FALSE}
 seasonal_rentals <- bike_clean %>%
@@ -191,8 +201,10 @@ ggplot(seasonal_rentals,
   ) +
   theme_minimal()
 ```
+
+All seasons show morning and evening commute peaks: summer has the higherest while winter has the lowest
 ---
-class:center middle
+class: inverse center middle
 ##How are weather conditions associated with hourly bike rentals?
 ---
 ##Bike Rentals vs Temperature
@@ -225,6 +237,11 @@ ggplot(bike_clean,
   theme_minimal()
 ```
 ---
+class:center middle
+##The scatter plot with a LOESS smoother shows a positive, non‑linear association: bike rentals rise with temperature.
+##Demand peaks at roughly 20-25 degree centigrade and the rentals starts to fall at higher temperature. 
+##The wide spread of points indicates temperature alone cannot fully explain rental volume.
+---
 ##Bike Rentals vs Humidity
 ```{r echo=TRUE,eval=FALSE}
 ggplot(bike_clean,
@@ -254,6 +271,11 @@ ggplot(bike_clean,
   ) +
   theme_minimal()
 ```
+---
+class:center middle
+## This scatter plot with a LOESS smoother shows a non-linear relationship between hourly bike rentals and humidity.
+## Rental demand rises slightly when humidity increases to around 50-60%, then falls noticeably when humidity higher than around 70%
+##The wide spread of points indicates temperature alone cannot fully explain rental volume.
 ---
 Average Bike Rentals by Rainfall Level
 ```{r echo=TRUE,eval=FALSE}
@@ -312,6 +334,10 @@ ggplot(rainfall_level_avg,
 ```
 ---
 class:center middle
+##This bar chart shows average hourly bike rentals grouped bu rainfall level.
+##Average rentals in no rainy days are far higher than rainy days.As rainfall increases, the average rental volume drops substantially.When rainfall level is 0-2mm, the demand of rentals already reduced and stay low for morderate(2-5mm) and heavy rain(above 5mm)
+---
+class: inverse center middle
 ##Do rental patterns differ between working days and holidays?
 ---
 ##Daily Bike Rentals: Holidays vs Non-Holidays
@@ -358,6 +384,12 @@ ggplot(daily_rentals,
   theme_minimal()
 ```
 ---
+class:center middle
+##The boxplot compares the distribution of daily rentals on holidays and non-holidays.
+##Non-holiday days have a higher median daily rental count and wider interquartile range.Holiday days show lower median rentals overall,with a narrower spread
+##This suggests that bike demand is generally higehr on normal working days, likely because of commuter trips.
+---
+class:center middle
 ##Hourly Bike Rental Patterns by Holiday Status
 ```{r echo=TRUE,eval=FALSE}
 holiday_hourly <- bike_clean %>%
@@ -397,6 +429,11 @@ ggplot(holiday_hourly,
   ) +
   theme_minimal()
 ```
+---
+class:center middle
+##This line graph compares average hourly bike rentals across the day for holidays and non holidays
+##On non-holidays, there are two peaks: morning peak and evening peak,matching commuting hours. Holidays demand follows a single peak in the afternoon with no extreme sharp floating in short time.
+##This difference reflects contrasting purpose:commuting on workdays and leisure on holidays
 ---
 ## A statement of the overall goal / research question
 

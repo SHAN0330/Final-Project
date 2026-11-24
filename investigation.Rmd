@@ -54,7 +54,7 @@ bike_clean %>%
   distinct(date, hour) %>%
   nrow()
 
-#Research Question1: How does bike rental demand vary across different hours of the day and seasons?
+#Research Question1: and see How does bike rental demand vary across different hours of the day sons?
 hourly_rentals <- bike_clean %>%
   group_by(hour) %>%
   summarise(

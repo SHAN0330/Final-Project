@@ -4,7 +4,7 @@
     <title>Seoul Bike Sharing Demand</title>
     <meta charset="utf-8" />
     <meta name="author" content="Team name   Names of team members" />
-    <meta name="date" content="2026-11-20" />
+    <meta name="date" content="2026-11-24" />
     <script src="libs/header-attrs-2.32/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -25,7 +25,7 @@ class: center, middle, inverse, title-slide
 ### University of Edinburgh
 ]
 .date[
-### 2026-11-20
+### 2026-11-24
 ]
 
 ---
@@ -42,7 +42,7 @@ class: center middle
 ##2.How are weather conditions associated with hourly bike rentals?
 ##3.Do rental patterns differ between working days and holidays?
 ---
-class:center middle
+class: inverse center middle
 ## How do hourly Seoul bike rentals vary by time of day
 ---
 
@@ -62,6 +62,11 @@ ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
 ---
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-2-1.png" alt="" width="80%" /&gt;
+---
+class:center middle
+##The plot shows the average hourly bike rentals across the day in Seoul.
+##The overall distribution follows a bimoal pattern, where the evening peak is higher than the morning one and the lowest point is in the early morning around 5 a.m. 
+##This indicates that bike rentals are dominated by commuting, with greater demand during the after-work period.
 ---
 #Average Hourly Bike Rentals by Season in Seoul
 
@@ -90,6 +95,11 @@ seasonal_avg &lt;- bike_clean %&gt;%
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-4-1.png" alt="" width="80%" /&gt;
 ---
+class:center middle
+##This bar chart compares average hourly bike rentals across four seasons in Seoul. 
+##Average bike rentals peak in summer, are moderatley high in autumn and spring, but drop sharply in winter. 
+##The pattern suggests that season and weather are associated with bike‑riding demand, with much lower usage in cold winter months.
+---
 ##Hourly Bike Rental Patterns Differ Across Seasons
 
 ``` r
@@ -111,8 +121,10 @@ ggplot(seasonal_rentals,
 ---
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-6-1.png" alt="" width="80%" /&gt;
+
+All seasons show morning and evening commute peaks: summer has the higherest while winter has the lowest
 ---
-class:center middle
+class: inverse center middle
 ##How are weather conditions associated with hourly bike rentals?
 ---
 ##Bike Rentals vs Temperature
@@ -134,6 +146,11 @@ ggplot(bike_clean,
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-8-1.png" alt="" width="80%" /&gt;
 ---
+class:center middle
+##The scatter plot with a LOESS smoother shows a positive, non‑linear association: bike rentals rise with temperature.
+##Demand peaks at roughly 20-25 degree centigrade and the rentals starts to fall at higher temperature. 
+##The wide spread of points indicates temperature alone cannot fully explain rental volume.
+---
 ##Bike Rentals vs Humidity
 
 ``` r
@@ -152,6 +169,11 @@ ggplot(bike_clean,
 ---
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-10-1.png" alt="" width="80%" /&gt;
+---
+class:center middle
+## This scatter plot with a LOESS smoother shows a non-linear relationship between hourly bike rentals and humidity.
+## Rental demand rises slightly when humidity increases to around 50-60%, then falls noticeably when humidity higher than around 70%
+##The wide spread of points indicates temperature alone cannot fully explain rental volume.
 ---
 Average Bike Rentals by Rainfall Level
 
@@ -186,6 +208,10 @@ class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-12-1.png" alt="" width="80%" /&gt;
 ---
 class:center middle
+##This bar chart shows average hourly bike rentals grouped bu rainfall level.
+##Average rentals in no rainy days are far higher than rainy days.As rainfall increases, the average rental volume drops substantially.When rainfall level is 0-2mm, the demand of rentals already reduced and stay low for morderate(2-5mm) and heavy rain(above 5mm)
+---
+class: inverse center middle
 ##Do rental patterns differ between working days and holidays?
 ---
 ##Daily Bike Rentals: Holidays vs Non-Holidays
@@ -214,6 +240,12 @@ ggplot(daily_rentals,
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-14-1.png" alt="" width="80%" /&gt;
 ---
+class:center middle
+##The boxplot compares the distribution of daily rentals on holidays and non-holidays.
+##Non-holiday days have a higher median daily rental count and wider interquartile range.Holiday days show lower median rentals overall,with a narrower spread
+##This suggests that bike demand is generally higehr on normal working days, likely because of commuter trips.
+---
+class:center middle
 ##Hourly Bike Rental Patterns by Holiday Status
 
 ``` r
@@ -237,6 +269,11 @@ ggplot(holiday_hourly,
 ---
 class:center middle
 &lt;img src="presentation_files/figure-html/unnamed-chunk-16-1.png" alt="" width="80%" /&gt;
+---
+class:center middle
+##This line graph compares average hourly bike rentals across the day for holidays and non holidays
+##On non-holidays, there are two peaks: morning peak and evening peak,matching commuting hours. Holidays demand follows a single peak in the afternoon with no extreme sharp floating in short time.
+##This difference reflects contrasting purpose:commuting on workdays and leisure on holidays
 ---
 ## A statement of the overall goal / research question
 
