@@ -1,7 +1,7 @@
 ---
 title: "Seoul Bike Sharing Demand"
 subtitle: "An analysis of factors affecting hourly bike rental demand in Seoul"
-author: "Team name <br> Names of team members"
+author: "Team name <br> JUNHAO SHAN, Dora Xia, William Hu"
 institute: "University of Edinburgh"
 date: "`r Sys.Date()`"
 output:
