@@ -160,8 +160,12 @@ ggplot(rainfall_level_avg,
 ```
 
 Bar chart showing average hourly bike rentals grouped by rainfall level, indicating lower demand with heavier rain.
+
+## Regression Analysis 
+
+### Model choice
+Our target variable is the hourly number of bike rentals, a continuous outcome, so we choose linear regression.We built three linear regression models incrementally to examine the drivers of bike rental demand. The first model uses only temperature as the predictor. The second extends the model by adding humidity and rain status. The final full model incorporates weather variables together with hour, season and holiday status, to capture both weather effects and temporal patterns. 
 ```{r model, echo=FALSE}
-#Regression Analysis 
 
 #Basic Model 1: Temperature Only
 temp_fit <- linear_reg() %>%
@@ -234,6 +238,8 @@ According to Regression analysis Temperature only: Predicted hourly bike rentals
 Weather variables: Predicted hourly bike rentals = 767.33 + 32.64 × Temperature - 7.33 × Humidity - 473.55 × Rain Status
 
 ### 3.Rental patterns between holidays and non-holidays
+
+This box plot compares total daily bike rentals on holidays and non‑holidays. It shows that the median daily rental volume is lower on holidays than on regular days. The spread of rental values also differs, suggesting that people’s cycling behaviour changes when it is a holiday.
 ```{r RQ3, echo=FALSE}
 #RQ3: How do bike rental patterns differ between holidays and non-holidays?
 
@@ -256,7 +262,12 @@ ggplot(daily_rentals,
     y = "Daily Bike Rentals"
   ) +
   theme_minimal()
+```
 
+This box plot compares total daily bike rentals on holidays and non‑holidays. It shows that the median daily rental volume is lower on holidays than on regular days. The spread of rental values also differs, suggesting that people’s cycling behaviour changes when it is a holiday.
+
+
+```{r plot3, echo=FALSE}
 #Diagram2: "Hourly Bike Rental Patterns by Holiday Status"
 holiday_hourly <- bike_clean %>%
   group_by(holiday, hour) %>%
@@ -281,50 +292,28 @@ ggplot(holiday_hourly,
 
 ```
 
+This line graph illustrates the average hourly bike rental profiles for holidays and non‑holidays across the day. On normal days, there are two distinct peaks corresponding to morning and evening commuting hours, with overall rental volumes generally higher. In contrast, the holiday curve is flatter, lacking sharp commuting peaks; demand rises gradually in the daytime and reaches a lower, broader peak in the afternoon. This indicates that holiday bike use is less driven by commuting and more for leisure.
 
 ## Limitations and Considerations
-1.As observational data,the database only correlations association can be established,but not causal relationship.
-2.Variables including temperature,humidity,season and time of day are confounded with one another
-3.The original database provides no information about users' actual purpose.
+
+**Data Limitations**
+
+1.As observational data,the database can only demonstrate correlations association rather than causal relationship.
+2.The original database provides no information about users' actual purpose.
+3.The data is restricted to a single city and a limited time span,so findings may not generalize widely
+4.Sample sizes of holiday and non-holiday are unequal.
+
+**Model Limitations**
+
+1.Variables including temperature,humidity,season and time of day are confounded with one another
+2.Linear regression may not fully capture non-linear relationships between variables.
+3.Hourly observations may violate rhw independence assumption due to temporal autocorrelation
+4.Model performance was not evaluated on independent test data.
 
 ## Conclusion
+Our analyses suggest that while weather, hour, season and holiday status do relate to bike rental demand, their explanatory power is limited. Extra variables (e.g. road conditions, public transport disruption or station availability) and more complex models could be considered in future to build better predictors for rental volume.
 
 ## References
 Sathishkumar, V. E., Park, J., & Cho, Y. (2020).
 https://archive.ics.uci.edu/dataset/560/seoul+bike+sharing+demand
 
-## Research Question
-
-Describe your research question here.
-Include why this question might be of interest.
-
-## Data
-
-Briefly describe your dataset here - include a description of the key variables you will be investigating.
-Include a citation for your data.
-See <http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840> for guidance on proper citation for datasets.
-If you got your data off the web, make sure to state the retrieval date.
-
-## Findings
-
-The write-up of your project and findings go here.
-
-Think of this as the text of your presentation with some extra detail to cover what there was not time to discuss in the presentation.
-This might include any assumptions you made when doing your analysis, any limitations of the work you have done or any ideas you have for future work.
-Feel free to split this section into subsections to make it easier to read.
-
-The length should be roughly 1,500 words.
-If you want to use a word count addin, you can install this by copying and pasting the following into RStudio:
-
-`devtools::install_github("benmarwick/wordcountaddin", type = "source", dependencies = TRUE)`
-
-You will then need to restart RStudio.
-Once you have done that, select the text you want to count the words of, go to Addins, and select the `Word count` addin.
-This addin counts words using two different algorithms, but the results should be similar and as long as you're in the ballpark of 1,500 words, you're good!
-The addin will ignore code chunks and only count the words in prose.
-If you don't want to use the addin you can always copy and paste the text into Microsoft Word to do a Word Count!
-
-You can also load your data here and present any analysis results / plots.
-Make sure to hide your code with `echo = FALSE` unless the point you are trying to make is about the code itself, in which case you should show your code.
-
-## References
