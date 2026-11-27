@@ -7,10 +7,31 @@ editor_options:
   markdown: 
     wrap: sentence
 ---
-##Introduction
-To what extent do time of day, temperature and date type relate to the rentals of sharing bike.
 
-##Data Overview
+## Introduction
+Urban shared Bicycles provides a rich context for exploring enhancement of mobility comfort.Weather data and holiday information factors may affect rental demand.
+
+**To what extent do time of day, temperature and holiday status relate to the rentals of sharing bike in Seoul?**
+
+## Data Overview
+The dataset comprises 8760 instances and 13 features drawn from Seoul Bike Sharing System. Each observation records rented bike count, rented hours, temperature, date type and other information.
+
+To focus on the key predictors,we retrained just hour, seasons and holiday status.Our cleaned set contains the following main variables:
+
+|**Variable**|**Type**|**Description**|
+
+|hour|Numeric|The hour of the day,ranging from 0 to 23|
+
+|season|Categorical|The season of the year: Spring, Summer,Autumn,Winter|
+
+|temperature|Numeric|measured in degree Celsius|
+
+|humidity|Numeric|relative humidity,expressed as a percentage %|
+
+|rainfall|Numeric|measured in millimeters (mm)|
+
+|holiday|Categorical|wheter holiday or not(TRUE/FALSE)|
+
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -41,6 +62,10 @@ bike_clean <- bike_data %>%
   filter(functioning_day == "Yes")
 
 ```
+## Data Visualisations
+
+### 1.Rental denmand in different hours of day
+To visualize hourly rental patterns across seasons, we plot the average hourly bike rentals against the hour of the day 
 
 ```{r RQ1, echo=FALSE}
 #  that you need for your report.
@@ -60,7 +85,10 @@ ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
     y = "Average Number of Bike Rentals Per Hour"
   )+
   theme_minimal()
+```
 
+The graph shows a consistent bimodal trend: two clear peaks appear during morning and evening commuting hours, while demand is lowest in the early morning.
+```{r plot1, echo=FALSE}
 #Diagram2: "Hourly Bike Rental Patterns Differ Across Seasons"
   seasonal_rentals <- bike_clean %>%
   group_by(seasons, hour) %>%
@@ -78,6 +106,12 @@ ggplot(seasonal_rentals,
   theme_minimal()
 ```
 
+We plot the average hourly bike rentals against the hour of the day combined with changes in the season. Average bike rentals peak in summer, are moderately high in autumn and spring, but drop sharply in winter.
+This suggests that weather conditions,such as temperature, storngly influence cycling activity alongside commuting behaviour.
+
+### 2.Impact of weather conditions
+
+The scatter plot with a LOESS smoother shows a positive, non‑linear association:bike rentals generally rise with increasing temperature, but after a certain point, demand begins to fall when it becomes too hot.
 ```{r RQ2, echo=FALSE}
 #Research Question2 : How do weather conditions affect bike rental demand in Seoul?
 
@@ -93,7 +127,11 @@ ggplot(bike_clean,
     y = "Hourly Bike Rentals"
   ) +
   theme_minimal()
+```
 
+While warmer temperatures generally encourage cycling, extreme heat reduces rental demand. Rainfall is another important weather factor that may suppress bike use.
+
+```{r plot2, echo=FALSE}
 #Diagram2: "Average Bike Rentals by Rainfall Level"
 rainfall_level_avg <- bike_clean %>%
   mutate(rain_level = case_when(
@@ -119,7 +157,10 @@ ggplot(rainfall_level_avg,
     y = "Average Hourly Bike Rentals"
   ) +
   theme_minimal()
+```
 
+Bar chart showing average hourly bike rentals grouped by rainfall level, indicating lower demand with heavier rain.
+```{r model, echo=FALSE}
 #Regression Analysis 
 
 #Basic Model 1: Temperature Only
@@ -188,10 +229,11 @@ coefficient_comparison <- data.frame(
 )
 coefficient_comparison
 ```
-According to Regression analysis
-Temperature only: Predicted hourly bike rentals = 348 + 29.9 × Temperature.
-Weather variables: Predicted hourly bike rentals = 767.33 + 32.64 × Temperature
-- 7.33 × Humidity - 473.55 × Rain Status
+
+According to Regression analysis Temperature only: Predicted hourly bike rentals = 348 + 29.9 × Temperature.
+Weather variables: Predicted hourly bike rentals = 767.33 + 32.64 × Temperature - 7.33 × Humidity - 473.55 × Rain Status
+
+### 3.Rental patterns between holidays and non-holidays
 ```{r RQ3, echo=FALSE}
 #RQ3: How do bike rental patterns differ between holidays and non-holidays?
 
@@ -239,6 +281,18 @@ ggplot(holiday_hourly,
 
 ```
 
+
+## Limitations and Considerations
+1.As observational data,the database only correlations association can be established,but not causal relationship.
+2.Variables including temperature,humidity,season and time of day are confounded with one another
+3.The original database provides no information about users' actual purpose.
+
+## Conclusion
+
+## References
+Sathishkumar, V. E., Park, J., & Cho, Y. (2020).
+https://archive.ics.uci.edu/dataset/560/seoul+bike+sharing+demand
+
 ## Research Question
 
 Describe your research question here.
@@ -274,6 +328,3 @@ You can also load your data here and present any analysis results / plots.
 Make sure to hide your code with `echo = FALSE` unless the point you are trying to make is about the code itself, in which case you should show your code.
 
 ## References
-
-List any references here.
-You should, at a minimum, list your data source.
