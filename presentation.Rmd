@@ -36,14 +36,56 @@ library(xaringanthemer)
 ```{r setup, include=FALSE}
 # For better figure resolution
 knitr::opts_chunk$set(fig.retina = 3, dpi = 300, fig.width = 6, fig.asp = 0.618, out.width = "80%")
+
+#Background image
+style_xaringan()
 ```
-class: center middle
-##1.How do hourly Seoul bike rentals vary by time of the day?
-##2.How are weather conditions associated with hourly bike rentals?
-##3.Do rental patterns differ between working days and holidays?
+# Research Questions
+
+## RQ1
+How does bike rental demand vary across different hours of the day and seasons?
+
+## RQ2
+How are weather conditions associated with hourly bike rental demand?
+
+## RQ3
+How do bike rental patterns differ between holidays and non-holidays?
+---
+# Dataset Overview
+
+.pull-left[
+
+**Data Source**
+UCI Machine Learning Repository
+
+**Dataset Characteristics**
+- 8,760 original hourly observations
+- 14 variables
+- 8,465 observations after cleaning
+
+**Data Preparation**
+- Standardised column names
+- Checked missing values and duplicates
+- Removed 295 non-functioning hourly observations
+
+]
+
+.pull-right[
+
+```{r echo=FALSE, out.width="100%"}
+include_graphics("img/seoul-bike.jpg")
+```
+
+Photo source: [GINA](https://ginatw.com/seoulbike/)
+
+]
+
+---
+
 ---
 class: inverse center middle
-## How do hourly Seoul bike rentals vary by time of day
+
+## RQ1: Time and Season
 ---
 ```{r load-data, include=FALSE}
 # Load your data here
@@ -81,8 +123,9 @@ hourly_rentals <- bike_clean %>%
 
 ```
 
-# Hourly Bike Rental Plot
-```{r echo=TRUE,eval=FALSE}
+#Hourly Bike Rental Patterns
+.pull-left[
+```{r echo=FALSE, out.width="100%"}
 ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
   geom_line(colour = "blue") +
   labs(
@@ -92,256 +135,304 @@ ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
   ) +
   theme_minimal()
 ```
+]
+
+.pull-right[
+###Key Findings
+- Two peaks at 8 am and 6 pm.
+- Evening peak: approximately 1,550 rentals per hour.
+- Lowest demand around 4–5 am.
+- The pattern may be associated with commuting.
+]
 ---
-class:center middle
-```{r echo=FALSE}
-ggplot(hourly_rentals, aes(x = hour, y = avg_rentals)) +
-  geom_line(colour = "blue") +
+
+# Average Hourly Bike Rentals by Season
+.pull-left[
+```{r echo=FALSE, out.width="100%"}
+seasonal_avg <- bike_clean %>%
+  group_by(seasons) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+  ggplot(seasonal_avg,
+       aes(
+         x = factor(seasons,
+                    levels = c("Spring", "Summer", "Autumn", "Winter")),
+                    y = avg_rentals,
+                    fill = seasons
+                    )) +
+  geom_col() +
   labs(
-    title = "Average hourly bike rentals in Seoul",
-    x = "Hour of the Day",
+    title = "Average Bike Rentals by Season in Seoul",
+    x = "Season",
     y = "Average Number of Bike Rentals Per Hour"
   ) +
   theme_minimal()
-#Background image
-style_xaringan(
-  title_slide_background_image = "img/confetti.jpg"
+```
+]
+
+.pull-right[
+###Key Findings
+- Summer has the highest average rental demand.
+- Autumn and spring show relatively high demand.
+- Winter has the lowest rental demand.
+- Seasonal differences are associated with weather conditions.
+]
+---
+
+# Hourly Bike Rental Patterns by Season
+.pull-left[
+```{r echo=FALSE, out.width="100%", message=FALSE}
+seasonal_rentals <- bike_clean %>%
+  group_by(seasons, hour) %>%
+  summarise(
+    avg_rentals = mean(rented_bike_count)
+  )
+ggplot(seasonal_rentals,
+       aes(x = hour, y = avg_rentals, colour = seasons)) +
+  geom_line() +
+  labs(
+    title = "Hourly Bike Rentals Patterns by Season",
+    x = "Hour of the Day",
+    y = "Average Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+```
+]
+
+.pull-right[
+### Key Findings
+- Morning and evening peaks appear across seasons.
+- Summer evening demand exceeds 2,000 rentals/hour.
+- Winter has substantially lower rental demand.
+- Rental patterns vary by both hour and season.
+]
+---
+class: inverse center middle
+## RQ2: Weather Conditions
+---
+# Bike Rentals VS Temperature
+.pull-left[
+```{r echo=FALSE, out.width="100%", message=FALSE}
+ggplot(bike_clean,
+       aes(x = temperature,
+           y = rented_bike_count)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth() +
+  labs(
+    title = "Bike Rentals vs Temperature",
+    x = "Temperature (°C)",
+    y = "Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+```
+]
+
+.pull-right[
+### Key Findings
+- Rental demand generally increases with temperature.
+- Demand peaks at approximately 25–30°C.
+- Demand decreases at higher temperatures.
+- The relationship is non-linear.
+- Temperature alone cannot fully explain rental demand.
+]
+---
+
+# Bike Rentals vs Humidity
+.pull-left[
+```{r echo=FALSE, out.width="100%", message=FALSE}
+ggplot(bike_clean,
+       aes(x = humidity_percent,
+           y = rented_bike_count)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth() +
+  labs(
+    title = "Bike Rentals vs Humidity",
+    x = "Humidity (%)",
+    y = "Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+```
+]
+
+.pull-right[
+### Key Findings
+- Rental demand peaks at around 50% humidity.
+- Demand decreases sharply above 75% humidity.
+- The relationship is non-linear.
+- Humidity alone cannot fully explain rental demand.
+]
+---
+
+# Average Bike Rentals by Rainfall Level
+.pull-left[
+```{r echo=FALSE, out.width="100%", message=FALSE}
+rainfall_level_avg <- bike_clean %>%
+  mutate(rain_level = case_when(
+    rainfall_mm == 0 ~ "No Rain",
+    rainfall_mm > 0 & rainfall_mm <= 2 ~ "0-2 mm",
+    rainfall_mm > 2 & rainfall_mm <= 5 ~ "2-5 mm",
+    rainfall_mm > 5 ~ "Above 5 mm"
+  )) %>%
+  group_by(rain_level) %>%
+  summarise(avg_rentals = mean(rented_bike_count),
+            n = n()
+            )
+
+ggplot(rainfall_level_avg,
+       aes(x = factor(rain_level,
+                      levels = c("No Rain", "0-2 mm", "2-5 mm", "Above 5 mm")),
+           y = avg_rentals
+           )) +
+  geom_col() +
+  labs(
+    title = "Average Bike Rentals by Rainfall Level",
+    x = "Rainfall Level",
+    y = "Average Hourly Bike Rentals"
+  ) +
+  theme_minimal()
+```
+]
+
+.pull-right[
+### Key Findings
+- Dry conditions: approximately 765 rentals/hour.
+- Light rainfall: around 200 rentals/hour.
+- Demand remains low during heavier rainfall.
+- Rainfall is negatively associated with rental demand.
+]
+---
+
+```{r regression-models, include=FALSE}
+#Basic Model 1: Temperature Only
+temp_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature,
+      data = bike_clean)
+
+#Model 2: Weather Variables
+weather_data <- bike_clean %>%
+  mutate(rain_status = case_when(
+    rainfall_mm == 0 ~ "No Rain",
+    rainfall_mm > 0 ~ "Rain"
+  ))
+
+weather_fit <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature +
+        humidity_percent + rain_status,
+      data = weather_data)
+
+#Model 3: Weather and other factors
+weather_fit_2 <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(rented_bike_count ~ temperature +
+        humidity_percent + rain_status +
+        factor(hour) + seasons + holiday,
+      data = weather_data)
+```
+
+# Regression Models and Equations
+
+### Model 1: Temperature Only
+
+Predicted hourly bike rentals = 348 + 29.9 × Temperature
+
+### Model 2: Weather Variables
+
+Predicted hourly bike rentals = 767.33 + 32.64 × Temperature
+- 7.33 × Humidity - 473.55 × Rain Status
+
+Rain Status: 0 = No Rain, 1 = Rain.
+
+### Model 3: Weather and Other Factors
+
+Additional variables: Hour, Season and Holiday Status.
+
+---
+
+# Regression Model Comparison
+
+```{r echo=FALSE}
+model_comparison <- data.frame(
+  Model = c("Temperature Only",
+            "Weather Model",
+            "Adjusted Weather Model"),
+  R_squared = c(0.317, 0.433, 0.677),
+  Adjusted_R_squared = c(0.317, 0.432, 0.676),
+  Sigma = c(531.02, 483.91, 365.85)
 )
+
+kable(model_comparison)
 ```
+
+### Key Findings
+
+- R-squared increases from 0.317 to 0.677.
+- Adjusted R-squared increases across all three models.
+- Residual standard error decreases from 531.02 to 365.85.
+- Model 3 provides the best fit to the observed data.
+
 ---
-class:center middle
-##The plot shows the average hourly bike rentals across the day in Seoul.
-##The overall distribution follows a bimoal pattern, where the evening peak is higher than the morning one and the lowest point is in the early morning around 5 a.m. 
-##This indicates that bike rentals are dominated by commuting, with greater demand during the after-work period.
----
-#Average Hourly Bike Rentals by Season in Seoul
-```{r echo=TRUE,eval=FALSE}
-seasonal_avg <- bike_clean %>%
-  group_by(seasons) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-  ggplot(seasonal_avg,
-       aes(
-         x = factor(seasons,
-                    levels = c("Spring", "Summer", "Autumn", "Winter")),
-                    y = avg_rentals,
-                    fill = seasons
-                    )) +
-  geom_col() +
-  labs(
-    title = "Average Bike Rentals by Season in Seoul",
-    x = "Season",
-    y = "Average Number of Bike Rentals Per Hour"
-  ) +
-  theme_minimal()
-  
-```
----
-class:center middle
+
+# Regression Coefficients Comparison
+
 ```{r echo=FALSE}
-seasonal_avg <- bike_clean %>%
-  group_by(seasons) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-  ggplot(seasonal_avg,
-       aes(
-         x = factor(seasons,
-                    levels = c("Spring", "Summer", "Autumn", "Winter")),
-                    y = avg_rentals,
-                    fill = seasons
-                    )) +
-  geom_col() +
-  labs(
-    title = "Average Bike Rentals by Season in Seoul",
-    x = "Season",
-    y = "Average Number of Bike Rentals Per Hour"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-##This bar chart compares average hourly bike rentals across four seasons in Seoul. 
-##Average bike rentals peak in summer, are moderatley high in autumn and spring, but drop sharply in winter. 
-##The pattern suggests that season and weather are associated with bike‑riding demand, with much lower usage in cold winter months.
----
-##Hourly Bike Rental Patterns Differ Across Seasons
-```{r echo=TRUE,eval=FALSE}
-seasonal_rentals <- bike_clean %>%
-  group_by(seasons, hour) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-ggplot(seasonal_rentals,
-       aes(x = hour, y = avg_rentals, colour = seasons)) +
-  geom_line() +
-  labs(
-    title = "Hourly Bike Rentals Patterns by Season",
-    x = "Hour of the Day",
-    y = "Average Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-```{r echo=FALSE,message=FALSE}
-seasonal_rentals <- bike_clean %>%
-  group_by(seasons, hour) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-ggplot(seasonal_rentals,
-       aes(x = hour, y = avg_rentals, colour = seasons)) +
-  geom_line() +
-  labs(
-    title = "Hourly Bike Rentals Patterns by Season",
-    x = "Hour of the Day",
-    y = "Average Hourly Bike Rentals"
-  ) +
-  theme_minimal()
+coefficient_comparison <- data.frame(
+  Variable = c("Temperature",
+               "Humidity",
+               "Rain Status"),
+  Weather_Model = c(32.64, -7.33, -473.55),
+  Adjusted_Weather_Model = c(24.46, -5.63, -522.56)
+)
+
+kable(coefficient_comparison)
 ```
 
-All seasons show morning and evening commute peaks: summer has the higherest while winter has the lowest
+### Key Findings
+
+- Temperature is positively associated with rental demand.
+- Humidity and rainfall are negatively associated with rental demand.
+- Rainy hours are associated with around 523 fewer rentals in Model 3, holding other variables constant.
+- Coefficients change after accounting for hour, season and holiday status.
+
 ---
+
+#Residual Analysis for Model 3:
+.pull-left[
+
+```{r echo=FALSE, out.width="100%"}
+weather_aug_2 <- augment(weather_fit_2$fit)
+
+ggplot(weather_aug_2,
+       aes(x = .fitted, y = .resid)) +
+  geom_point(alpha = 0.1) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed") +
+  labs(
+    title = "Residual Plot for Adjusted Weather Model",
+    x = "Fitted Values",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+```
+]
+
+.pull-right[
+### Key Findings
+- Residual variability increases at higher fitted values.
+- The constant variance assumption may not hold.
+- Some predicted rental counts are negative.
+- The linear model has limitations despite its higher R-squared.
+]
+---
+
 class: inverse center middle
-##How are weather conditions associated with hourly bike rentals?
+## RQ3: Holiday Status
 ---
-##Bike Rentals vs Temperature
-```{r echo=TRUE,eval=FALSE}
-ggplot(bike_clean,
-       aes(x = temperature,
-           y = rented_bike_count)) +
-  geom_point(alpha = 0.1) +
-  geom_smooth() +
-  labs(
-    title = "Bike Rentals vs Temperature",
-    x = "Temperature (°C)",
-    y = "Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-```{r echo=FALSE,message=FALSE}
-ggplot(bike_clean,
-       aes(x = temperature,
-           y = rented_bike_count)) +
-  geom_point(alpha = 0.1) +
-  geom_smooth() +
-  labs(
-    title = "Bike Rentals vs Temperature",
-    x = "Temperature (°C)",
-    y = "Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-##The scatter plot with a LOESS smoother shows a positive, non‑linear association: bike rentals rise with temperature.
-##Demand peaks at roughly 20-25 degree centigrade and the rentals starts to fall at higher temperature. 
-##The wide spread of points indicates temperature alone cannot fully explain rental volume.
----
-##Bike Rentals vs Humidity
-```{r echo=TRUE,eval=FALSE}
-ggplot(bike_clean,
-       aes(x = humidity_percent,
-           y = rented_bike_count)) +
-  geom_point(alpha = 0.1) +
-  geom_smooth() +
-  labs(
-    title = "Bike Rentals vs Humidity",
-    x = "Humidity (%)",
-    y = "Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-```{r echo=FALSE,message=FALSE}
-ggplot(bike_clean,
-       aes(x = humidity_percent,
-           y = rented_bike_count)) +
-  geom_point(alpha = 0.1) +
-  geom_smooth() +
-  labs(
-    title = "Bike Rentals vs Humidity",
-    x = "Humidity (%)",
-    y = "Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-## This scatter plot with a LOESS smoother shows a non-linear relationship between hourly bike rentals and humidity.
-##Rental demand rises slightly when humidity increases to around 50-60%, then falls noticeably when humidity higher than around 70%
-##The wide spread of points indicates temperature alone cannot fully explain rental volume.
----
-Average Bike Rentals by Rainfall Level
-```{r echo=TRUE,eval=FALSE}
-rainfall_level_avg <- bike_clean %>%
-  mutate(rain_level = case_when(
-    rainfall_mm == 0 ~ "No Rain",
-    rainfall_mm > 0 & rainfall_mm <= 2 ~ "0-2 mm",
-    rainfall_mm > 2 & rainfall_mm <= 5 ~ "2-5 mm",
-    rainfall_mm > 5 ~ "Above 5 mm"
-  )) %>%
-  group_by(rain_level) %>%
-  summarise(avg_rentals = mean(rented_bike_count),
-            n = n()
-            )
-
-ggplot(rainfall_level_avg,
-       aes(x = factor(rain_level,
-                      levels = c("No Rain", "0-2 mm", "2-5 mm", "Above 5 mm")),
-           y = avg_rentals
-           )) +
-  geom_col() +
-  labs(
-    title = "Average Bike Rentals by Rainfall Level",
-    x = "Rainfall Level",
-    y = "Average Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-```{r echo=FALSE,message=FALSE}
-rainfall_level_avg <- bike_clean %>%
-  mutate(rain_level = case_when(
-    rainfall_mm == 0 ~ "No Rain",
-    rainfall_mm > 0 & rainfall_mm <= 2 ~ "0-2 mm",
-    rainfall_mm > 2 & rainfall_mm <= 5 ~ "2-5 mm",
-    rainfall_mm > 5 ~ "Above 5 mm"
-  )) %>%
-  group_by(rain_level) %>%
-  summarise(avg_rentals = mean(rented_bike_count),
-            n = n()
-            )
-
-ggplot(rainfall_level_avg,
-       aes(x = factor(rain_level,
-                      levels = c("No Rain", "0-2 mm", "2-5 mm", "Above 5 mm")),
-           y = avg_rentals
-           )) +
-  geom_col() +
-  labs(
-    title = "Average Bike Rentals by Rainfall Level",
-    x = "Rainfall Level",
-    y = "Average Hourly Bike Rentals"
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-##This bar chart shows average hourly bike rentals grouped bu rainfall level.
-##Average rentals in no rainy days are far higher than rainy days.As rainfall increases, the average rental volume dropssubstantially.When rainfall level is 0-2mm, the demand of rentals already reduced and stay low for morderate(2-5mm) and heavy rain(above 5mm)
----
-class: inverse center middle
-##Do rental patterns differ between working days and holidays?
----
-##Daily Bike Rentals: Holidays vs Non-Holidays
-```{r echo=TRUE,eval=FALSE}
+# Daily Bike Rentals: Holidays vs Non-Holidays
+.pull-left[
+```{r echo=FALSE, message=FALSE, out.width="100%"}
 daily_rentals <- bike_clean %>%
     group_by(date, holiday) %>%
   summarise(sum_rentals = sum(rented_bike_count),
@@ -361,37 +452,20 @@ ggplot(daily_rentals,
   ) +
   theme_minimal()
 ```
----
-class:center middle
-```{r echo=FALSE,message=FALSE}
-daily_rentals <- bike_clean %>%
-    group_by(date, holiday) %>%
-  summarise(sum_rentals = sum(rented_bike_count),
-            n_hours = n()
-            ) %>%
-  filter(n_hours == 24)
+]
 
-ggplot(daily_rentals,
-       aes(x = holiday,
-           y = sum_rentals,
-           fill = holiday)) +
-  geom_boxplot() +
-  labs(
-    title = "Daily Bike Rentals: Holidays vs Non-Holidays",
-    x = "Day Type",
-    y = "Daily Bike Rentals"
-  ) +
-  theme_minimal()
-```
+.pull-right[
+### Key Findings
+- Holiday median: approximately 7,000 rentals/day.
+- Non-holiday median: approximately 19,000 rentals/day.
+- Non-holidays generally have higher rental demand.
+- The two distributions overlap considerably.
+]
 ---
-class:center middle
-##The boxplot compares the distribution of daily rentals on holidays and non-holidays.
-##Non-holiday days have a higher median daily rental count and wider interquartile range.Holiday days show lower median rentals overall,with a narrower spread
-##This suggests that bike demand is generally higehr on normal working days, likely because of commuter trips.
----
-class:center middle
-##Hourly Bike Rental Patterns by Holiday Status
-```{r echo=TRUE,eval=FALSE}
+
+# Hourly Bike Rental Patterns by Holiday Status
+.pull-left[
+```{r echo=FALSE, out.width="100%", message=FALSE}
 holiday_hourly <- bike_clean %>%
   group_by(holiday, hour) %>%
   summarise(
@@ -409,90 +483,65 @@ ggplot(holiday_hourly,
   ) +
   theme_minimal()
 ```
+]
+
+.pull-right[
+### Key Findings
+- Non-holidays show two peaks at 8 am and 6 pm.
+- Non-holiday evening peak: around 1,600 rentals/hour.
+- Holiday demand peaks at around 875 rentals/hour in the late afternoon.
+- These differences may be associated with commuting and leisure activities.
+]
 ---
-class:center middle
-```{r echo=FALSE,message=FALSE}
-holiday_hourly <- bike_clean %>%
-  group_by(holiday, hour) %>%
-  summarise(
-    avg_rentals = mean(rented_bike_count)
-  )
-ggplot(holiday_hourly,
-       aes(x = hour,
-           y = avg_rentals,
-           colour = holiday)) +
-  geom_line() +
-  labs(
-    title = "Hourly Bike Rental Patterns by Holiday Status",
-    x = "Hour of the Day",
-    y = "Average Hourly Bike Rentals",
-  ) +
-  theme_minimal()
-```
----
-class:center middle
-##This line graph compares average hourly bike rentals across the day for holidays and non holidays
-##On non-holidays, there are two peaks: morning peak and evening peak,matching commuting hours. Holidays demand follows a single peak in the afternoon with no extreme sharp floating in short time.
-##This difference reflects contrasting purpose:commuting on workdays and leisure on holidays
----
+
 class:inverse center middle
 ##Findings & Discussion
 ---
 class: middle
-# Findings
-###Demand for bike-sharing is strongly associated with time of day and season.
-###Weather conditions(eg. temperature and rainfall) $\Rightarrow$ cycling activity
-###Daily and hourly rental pattern on holidays $\Rightarrow$ travel purpose.
+# Conclusion
+
+### Time and Season
+
+- Rental demand peaks at 8 am and 6 pm.
+- Summer has the highest demand, while winter has the lowest.
+
+### Weather Conditions
+
+- Moderate temperatures and dry conditions are associated with higher rental demand.
+- Model 3 explains 67.7% of the observed variation in hourly bike rentals.
+
+### Holiday Status
+
+- Non-holidays generally have higher rental demand.
+- Different hourly rental patterns may reflect differences in commuting and leisure activities.
+---
+
+# Applications
+
+### 1. Increase bike availability before morning and evening peak hours.
+
+### 2. Allocate more bicycles during warmer seasons.
+
+### 3. Consider weather conditions when planning bike distribution.
+
+### 4. Adopt different allocation strategies for holidays and non-holidays.
+
 ---
 class:middle
-#Key limitations
-###1.As observational data, the dataset only allows idnetification of associations rather than definitive causal relationships
-###2.Variables including temperature,humidity,season and time of day are confounded with one another
-###3.The original dataset provides no information about users' actual trip purpose
----
-# Images
+# Key Limitations
 
-```{r castle, echo = FALSE, out.width = "55%", fig.align = "center", fig.cap = "Image credit: Photo by Jörg Angeli on Unsplash."}
-include_graphics("img/edinburgh-castle.jpg")
-```
+### Data Limitations
 
-Or you can also include a full page image. See next slide.
+- Observational data cannot establish causation.
+- Actual trip purposes are not recorded.
+- The dataset covers only one city and a limited time period.
+- Holiday and non-holiday sample sizes are unequal.
 
----
+### Model Limitations
 
-
-class: inverse, center, middle
-background-image: url(img/edinburgh-castle.jpg)
-background-size: contain
+- Potential confounding between weather and temporal variables.
+- Linear regression may not capture non-linear relationships.
+- Hourly observations may not be independent.
+- Model performance was not evaluated on independent test data.
 ---
 
-# Math Expressions
-
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. &#36;\alpha+\beta$ renders $\alpha+\beta$. You can use the display style with double dollar signs:
-
-```
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
-
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-
-Limitations:
-
-1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-1. There should not be spaces after the opening `$` or before the closing `$`.
-
-1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
-
----
-
-# Feeling adventurous?
-
-- Want to find out more about `xaringan`? See https://slides.yihui.name/xaringan/#1.
-
-- You are welcome to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
-
-- But some of you might want to play around with slide styling. The 
-`xaringanthemer` provides some solutions for this that: https://pkg.garrickadenbuie.com/xaringanthemer.
-
-- And if you want more bells and whistles, there is also `xaringanExtra`: https://pkg.garrickadenbuie.com/xaringanExtra.
